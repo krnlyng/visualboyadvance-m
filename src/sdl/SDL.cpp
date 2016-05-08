@@ -486,7 +486,13 @@ static void sdlOpenGLVideoResize()
 
   glClear( GL_COLOR_BUFFER_BIT );
 
-  sdlOpenGLScaleWithAspect(destWidth, destHeight);
+#ifdef WITH_BUTTON_OVERLAY
+  int W, H;
+  SDL_GetWindowSize(window, &W, &H);
+  sdlOpenGLScaleWithAspect(W, H);
+#else
+  sdlOpenGLScaleWithAspect(destWidth, destHeight)
+#endif
 }
 
 void sdlOpenGLInit(int w, int h)
@@ -521,20 +527,19 @@ void sdlOpenGLInit(int w, int h)
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-
 #ifdef USE_OPENGLES
   glOrthof(0.0, 1.0, 1.0, 0.0, 0.0, 1.0);
 #else
   glOrtho(0.0, 1.0, 1.0, 0.0, 0.0, 1.0);
 #endif
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
 #ifdef ROTATE90
   glTranslatef(0.5, 0.5, 0.0);
   glRotatef(90.f, 0.0, 0.0, 1.0);
   glTranslatef(-0.5, -0.5, 0.0);
 #endif
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 
 #if 0
   glGenTextures(1, &screenTexture);
@@ -875,7 +880,11 @@ void sdlInitVideo() {
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 #endif
   window = SDL_CreateWindow("VBA-M", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+#ifdef WITH_BUTTON_OVERLAY
+                            0, 0, flags);
+#else
                             screenWidth, screenHeight, flags);
+#endif
   if (!openGL) {
     renderer = SDL_CreateRenderer(window, -1, 0);
   }
@@ -2170,12 +2179,30 @@ void systemDrawScreen()
         xf, yf,
     };
 
+#ifndef WITH_BUTTON_OVERLAY
     float vtxcoords[] = {
         0.f, 0.f,
         1.f, 0.f,
         0.f, 1.f,
         1.f, 1.f,
     };
+#else
+#ifdef ROTATE90
+    float vtxcoords[] = {
+        0.25f, 0.375f,
+        0.75f, 0.375f,
+        0.25f, 0.625f,
+        0.75f, 0.625f,
+    };
+#else
+    float vtxcoords[] = {
+        0.25f, 0.25f,
+        0.75f, 0.25f,
+        0.25f, 0.75f,
+        0.75f, 0.75f,
+    };
+#endif
+#endif
 #endif
 
     glClear( GL_COLOR_BUFFER_BIT );
