@@ -1224,6 +1224,8 @@ void sdlPollEvents()
     case SDL_JOYBUTTONUP:
     case SDL_JOYAXISMOTION:
     case SDL_KEYDOWN:
+    case SDL_FINGERDOWN:
+    case SDL_FINGERUP:
       inputProcessSDLEvent(event);
       break;
     case SDL_KEYUP:

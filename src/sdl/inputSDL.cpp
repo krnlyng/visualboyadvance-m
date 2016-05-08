@@ -484,6 +484,12 @@ void inputProcessSDLEvent(const SDL_Event &event)
                              event.jaxis.axis,
                              event.jaxis.value);
             break;
+        case SDL_FINGERDOWN:
+            // nh1402 put code here
+            break;
+        case SDL_FINGERUP:
+            // nh1402 put code here
+            break;
     }
 }
 
