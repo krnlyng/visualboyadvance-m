@@ -434,6 +434,17 @@ static void sdlOpenGLScaleWithAspect(int w, int h)
   float screenAspect = (float) sizeX / sizeY,
         windowAspect = (float) w / h;
 
+#ifdef ROTATE90
+  if(windowAspect == screenAspect)
+    glViewport(0, 0, h, w);
+  else if (windowAspect < screenAspect) {
+    int width = (int)(h * screenAspect);
+    glViewport((w - width) / 2, 0, width, h);
+  } else {
+    int height = (int)(w / screenAspect);
+    glViewport(0, (h - height) / 2, w, height);
+  }
+#else
   if(windowAspect == screenAspect)
     glViewport(0, 0, w, h);
   else if (windowAspect < screenAspect) {
@@ -443,6 +454,7 @@ static void sdlOpenGLScaleWithAspect(int w, int h)
     int width = (int)(h * screenAspect);
     glViewport((w - width) / 2, 0, width, h);
   }
+#endif
 }
 
 static void sdlOpenGLVideoResize()
@@ -518,6 +530,11 @@ void sdlOpenGLInit(int w, int h)
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+#ifdef ROTATE90
+  glTranslatef(0.5, 0.5, 0.0);
+  glRotatef(90.f, 0.0, 0.0, 1.0);
+  glTranslatef(-0.5, -0.5, 0.0);
+#endif
 
 #if 0
   glGenTextures(1, &screenTexture);
