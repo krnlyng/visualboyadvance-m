@@ -25,6 +25,19 @@ extern int emulating;
 // Hold up to 32 ms of data in the ring buffer
 const float SoundSDL::_delay = 0.032f;
 
+#include <audioresource.h>
+#include <glib.h>
+
+static audioresource_t *l_audioresource = NULL;
+static int l_audioresource_acquired = 0;
+
+void on_audioresource_acquired(audioresource_t *audioresource, bool acquired, void *user_data)
+{
+    printf("audioresource acquired: %d\n", acquired);
+    l_audioresource_acquired = acquired;
+}
+
+
 SoundSDL::SoundSDL():
 	_rbuf(0),
 	_dev(-1),
@@ -112,6 +125,16 @@ void SoundSDL::write(u16 * finalWave, int length)
 
 bool SoundSDL::init(long sampleRate)
 {
+	l_audioresource = audioresource_init(AUDIO_RESOURCE_MEDIA, on_audioresource_acquired, NULL);
+
+	audioresource_acquire(l_audioresource);
+
+	printf("Waiting for audioresource...\n");
+	while(!l_audioresource_acquired)
+	{
+		g_main_context_iteration(NULL, false);
+	}
+
 	SDL_AudioSpec audio;
 	audio.freq = sampleRate;
 	audio.format = AUDIO_S16SYS;
